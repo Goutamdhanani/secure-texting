@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+cryptography
+pydantic
+prometheus-client

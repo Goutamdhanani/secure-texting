@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: secure-texting
+spec:
+  selector:
+    app: secure-texting
+  ports:
+    - port: 80
+      targetPort: 8000

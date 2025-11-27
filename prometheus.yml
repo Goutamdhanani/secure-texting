@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'secure-texting'
+    static_configs:
+      - targets: ['app:8000']   # docker-compose service name

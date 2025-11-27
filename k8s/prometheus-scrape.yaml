@@ -1,0 +1,11 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: texting-monitor
+spec:
+  selector:
+    matchLabels:
+      app: secure-texting
+  endpoints:
+    - port: 8000
+      path: /metrics

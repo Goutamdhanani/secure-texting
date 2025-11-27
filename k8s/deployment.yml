@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-texting
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secure-texting
+  template:
+    metadata:
+      labels:
+        app: secure-texting
+    spec:
+      containers:
+      - name: api
+        image: yourdockerhub/secure-texting:latest
+        env:
+          - name: MASTER_KEY
+            valueFrom:
+              secretKeyRef:
+                name: crypto-key
+                key: master-key
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        emptyDir: {}
