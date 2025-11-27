@@ -1,28 +1,34 @@
+from __future__ import annotations
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-class UserCreate(BaseModel):
-    name: Optional[str] = None
+# Base user fields
+class UserBase(BaseModel):
+    name: str
 
-class UserOut(BaseModel):
+class UserCreate(UserBase):
+    pass
+
+class User(UserBase):
     id: int
-    name: Optional[str] = None
-    class Config:
-        orm_mode = True
 
-class MessageCreate(BaseModel):
+    # Pydantic v2: allow creating model from ORM objects (from_attributes)
+    model_config = {"from_attributes": True}
+
+# Base message fields
+class MessageBase(BaseModel):
     sender_id: int
     recipient_id: int
+
+class MessageCreate(MessageBase):
     message: str
 
-class MessageOut(BaseModel):
+class Message(MessageBase):
     id: int
-    sender_id: int
-    recipient_id: int
-    ciphertext: str
-    nonce: str
-    timestamp: datetime
+    ciphertext: Optional[str] = None
+    nonce: Optional[str] = None
+    timestamp: Optional[datetime] = None
     decrypted: Optional[str] = None
-    class Config:
-        orm_mode = True
+
+    model_config = {"from_attributes": True}

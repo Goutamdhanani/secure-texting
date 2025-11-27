@@ -1,19 +1,28 @@
-# app/main.py
-from fastapi import FastAPI, Depends, Response
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from .db import SessionLocal, Base, engine
-from . import crud, schemas
-from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from . import crud, models, schemas
 
-# create DB tables
-Base.metadata.create_all(bind=engine)
+# create tables if not present (safe)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception:
+    # in some environments (read-only DB), ignore
+    pass
 
-app = FastAPI(title="Secure AES Texting App")
+app = FastAPI(title="Secure Texting")
 
-# Prometheus metrics
-REQUEST_COUNT = Counter("app_http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"])
-REQUEST_LATENCY = Histogram("app_request_latency_seconds", "Request latency seconds", ["endpoint"])
+# CORS - allow all for dev. In production restrict origins.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+# dependency
 def get_db():
     db = SessionLocal()
     try:
@@ -21,40 +30,22 @@ def get_db():
     finally:
         db.close()
 
-# middleware-like decorator for metrics
-from functools import wraps
-import time
-
-def observe(endpoint_name):
-    def decorator(fn):
-        @wraps(fn)
-        def wrapper(*args, **kwargs):
-            start = time.time()
-            result = fn(*args, **kwargs)
-            elapsed = time.time() - start
-            REQUEST_LATENCY.labels(endpoint=endpoint_name).observe(elapsed)
-            # we can't always know status here; increment as 200
-            REQUEST_COUNT.labels(method="GET", endpoint=endpoint_name, status="200").inc()
-            return result
-        return wrapper
-    return decorator
-
-@app.post("/users/")
-@observe("create_user")
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+# Existing POST /users/ (create user)
+@app.post("/users/", response_model=schemas.User)
+def create_user_endpoint(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db, user)
 
-@app.post("/messages/")
-@observe("send_message")
-def send_message(msg: schemas.MessageCreate, db: Session = Depends(get_db)):
+# NEW: GET /users/ (list users) - fixes 405 for GET
+@app.get("/users/", response_model=list[schemas.User])
+def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.list_users(db, skip=skip, limit=limit)
+
+# POST /messages/ (send message)
+@app.post("/messages/", response_model=schemas.Message)
+def post_message(msg: schemas.MessageCreate, db: Session = Depends(get_db)):
     return crud.send_message(db, msg)
 
-@app.get("/conversations/{a}/{b}")
-@observe("get_conversation")
-def conv(a: int, b: int, db: Session = Depends(get_db)):
+# GET /conversations/{a}/{b}
+@app.get("/conversations/{a}/{b}", response_model=list[schemas.Message])
+def get_conv(a: int, b: int, db: Session = Depends(get_db)):
     return crud.get_conversation(db, a, b)
-
-@app.get("/metrics")
-def metrics():
-    data = generate_latest()
-    return Response(content=data, media_type=CONTENT_TYPE_LATEST)

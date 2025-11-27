@@ -341,3 +341,5 @@ Cargo.lock
 *.pdb
 
 # End of https://www.toptal.com/developers/gitignore/api/node,python,rust,git
+text-ui/.git
+text-ui/

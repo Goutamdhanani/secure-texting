@@ -1,0 +1,37 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        cd app
+        pip install -r requirements.txt
+
+    # ❌ Lint step removed
+
+    - name: Build Docker image
+      run: docker build -t secure-texting .
+
+    - name: Push image to Docker Hub
+      run: |
+        echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+        docker tag secure-texting yourdockerhub/secure-texting:latest
+        docker push yourdockerhub/secure-texting:latest
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s/

@@ -8,10 +8,6 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.refresh(u)
     return u
 
-def list_users(db: Session, skip: int = 0, limit: int = 100):
-    # return a list of users (for GET /users/)
-    return db.query(models.User).offset(skip).limit(limit).all()
-
 def send_message(db: Session, msg: schemas.MessageCreate):
     ciphertext, nonce = crypto.encrypt_message(msg.message)
     m = models.Message(
@@ -29,13 +25,9 @@ def get_conversation(db: Session, a: int, b: int):
     msgs = db.query(models.Message).filter(
         ((models.Message.sender_id == a) & (models.Message.recipient_id == b)) |
         ((models.Message.sender_id == b) & (models.Message.recipient_id == a))
-    ).order_by(models.Message.timestamp.asc()).all()
+    ).all()
 
     for msg in msgs:
-        # if decrypted field not present, attempt to decrypt (safe)
-        try:
-            msg.decrypted = crypto.decrypt_message(msg.ciphertext, msg.nonce)
-        except Exception:
-            msg.decrypted = None
+        msg.decrypted = crypto.decrypt_message(msg.ciphertext, msg.nonce)
 
     return msgs

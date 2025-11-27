@@ -1,0 +1,27 @@
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from .db import SessionLocal, Base, engine
+from . import crud, schemas
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Secure AES Texting App")
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.post("/users/")
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    return crud.create_user(db, user)
+
+@app.post("/messages/")
+def send_message(msg: schemas.MessageCreate, db: Session = Depends(get_db)):
+    return crud.send_message(db, msg)
+
+@app.get("/conversations/{a}/{b}")
+def conv(a: int, b: int, db: Session = Depends(get_db)):
+    return crud.get_conversation(db, a, b)
