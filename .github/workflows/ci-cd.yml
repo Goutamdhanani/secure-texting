@@ -28,12 +28,3 @@ jobs:
 
     # ❌ Docker login skipped
     # ❌ Docker push skipped
-
-    - name: Deploy to Kubernetes
-      if: ${{ secrets.KUBE_CONFIG != '' }}
-      env:
-        KUBECONFIG_CONTENT: ${{ secrets.KUBE_CONFIG }}
-      run: |
-        echo "$KUBECONFIG_CONTENT" | base64 --decode > kubeconfig.yml
-        export KUBECONFIG=$PWD/kubeconfig.yml
-        kubectl apply -f k8s/
