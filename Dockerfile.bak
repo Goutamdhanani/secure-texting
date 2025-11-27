@@ -1,0 +1,21 @@
+# simple dev Dockerfile for the secure-texting app
+FROM python:3.11-slim
+
+# install minimal deps
+RUN apt-get update && apt-get install -y --no-install-recommends gcc build-essential && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+# copy only requirements first for caching (if you have requirements file)
+# If you don't have one, this step is harmless
+COPY app/requirements.txt /src/requirements.txt 2>/dev/null || true
+RUN pip install --no-cache-dir -r /src/requirements.txt 2>/dev/null || true
+
+# copy code (in dev we'll mount your local dir, but this makes image standalone)
+COPY . /src
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# run uvicorn from the module path; rely on WORKDIR=/src so `import app` works
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

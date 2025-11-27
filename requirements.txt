@@ -1,5 +1,7 @@
 fastapi
-uvicorn
+uvicorn[standard]
 sqlalchemy
-cryptography
 pydantic
+cryptography
+prometheus_client
+python-dotenv
