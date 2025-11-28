@@ -408,7 +408,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Goutam Dhanani** | **Aaryan Rao**
+**Goutam Dhanani** 
 
 [![GitHub](https://img. shields.io/badge/-Goutamdhanani-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Goutamdhanani)
 [![GitHub](https://img. shields.io/badge/-Aaryanrao0001-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Aaryanrao0001)
