@@ -1,5 +1,10 @@
 <div align="center">
 
+# ScreenShots
+
+
+
+
 # 🔐 Secure Texting API
 
 ### End-to-End Encrypted Messaging Backend
@@ -417,6 +422,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <p>Made with ❤️ and lots of ☕</p>
 
-**[Backend](https://github.com/Goutamdhanani/secure-texting)** · **[Frontend](https://github.com/Aaryanrao0001/text-ui)**
-
+**[Backend](https://github.com/Goutamdhanani/secure-texting)** 
 </div>
